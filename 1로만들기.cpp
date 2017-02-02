@@ -1,43 +1,77 @@
-#include <stdio.h>
-#include <algorithm>
-#include <string>
+#include<cstdio>
+#include<string.h>
+#include<algorithm>
 
-int board[1111111];
+using namespace std;
 
-int min(int a, int b){
-  if(a<b) return a;
-  else return b;
+int point[2][100001];
+int memo[3][100001];
+
+int m;
+
+int solve(int x, int n)
+{
+	if (n >= m)
+		return 0;
+
+	int up, down, none;
+
+	int &ret = memo[x][n];
+
+	if (ret != -1)
+		return ret;
+
+	if (x == 0)	// 바로 전에 안뜯었을 경우
+	{
+		up = point[0][n] + solve(1, n + 1);
+		down = point[1][n] + solve(2, n + 1);
+		none = solve(0, n + 1);
+
+		ret = max(up, max(down, none));
+	}
+	else if (x == 1)	// 바로 전에 위에거 뜯었을 경우
+	{
+		down = point[1][n] + solve(2, n + 1);
+		none = solve(0, n + 1);
+
+		ret = max(down, none);
+	}
+	else if (x == 2)	// 바로 전에 아래거 뜯었을 경우
+	{
+		up = point[0][n] + solve(1, n + 1);
+		none = solve(0, n + 1);
+
+		ret = max(up, none);
+	}
+
+	return ret;
 }
 
-int solve(int idx){
+int main()
+{
+	int n, x;
 
-  //기저조건
-  if(idx == 1)
-    return 0;
-  if(idx == 2)
-    return 1;
-  if(idx == 3)
-    return 1;
+	scanf("%d", &n);
 
-  int &ret = board[idx];
-  if(ret != 0)
-    return ret;
-  //방문된 적 있다면 계산되어있는 값을 반환
+	for (int i = 0; i < n; i++)
+	{
+		scanf("%d", &m);
 
-  if(idx % 3 == 0)
-    ret = min(solve(idx-1) + 1,solve(idx/3) + 1);
-  else if(idx % 2 == 0)
-    ret = min(solve(idx-1)+1, solve(idx/2) + 1);
-  else ret = solve(idx-1) + 1;
+		for (int j = 0; j < 2; j++)
+		{
+			for (int a = 0; a < m; a++)
+				memo[2][a] = -1;
 
-  return ret;
+			for (int k = 0; k < m; k++)
+			{
+				scanf("%d", &x);
+				memo[j][k] = -1;
+				point[j][k] = x;
+			}
+		}
 
-}
+		printf("%d\n", solve(0, 0));
+	}
 
-int main(){
-
-  int N;
-  scanf("%d", &N);
-
-  printf("%d", solve(N));
+	return 0;
 }
